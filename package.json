@@ -1,0 +1,82 @@
+{
+  "name": "loopback-component-remote-ctx",
+  "description": "add the remote context to the specified remote methods of the loopback application.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Riceball LEE",
+    "email": "snowyu.lee@gmail.com",
+    "url": "https://github.com/snowyu"
+  },
+  "contributors": [
+    {
+      "name": "Riceball LEE",
+      "email": "snowyu.lee@gmail.com",
+      "url": "https://github.com/snowyu"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Riceball LEE",
+      "email": "snowyu.lee@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snowyu/loopback-component-remote-ctx.js.git"
+  },
+  "keywords": [
+    "loopback",
+    "strongloop",
+    "remote method",
+    "remote context"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/snowyu/loopback-component-remote-ctx.js/issues"
+  },
+  "homepage": "https://github.com/snowyu/loopback-component-remote-ctx.js",
+  "files": [
+    "README.md",
+    "LICENSE-MIT",
+    "*.js",
+    "*.coffee",
+    "test",
+    "src",
+    "lib"
+  ],
+  "main": "./index",
+  "scripts": {
+    "test": "grunt test",
+    "test-cov": "mocha --reporter dot && istanbul report text-summary lcovonly"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.0",
+    "debug": "^2.2.0",
+    "util-ex": "^0.3.15"
+  },
+  "peerDependencies": {
+    "loopback": ">=2.25.0"
+  },
+  "devDependencies": {
+    "chai": "~3.5.0",
+    "coffee-coverage": "^1.0.1",
+    "coffee-script": "^1.10.0",
+    "grunt": "~1.0.1",
+    "grunt-contrib-clean": "~1.0.0",
+    "grunt-contrib-coffee": "~1.0.0",
+    "grunt-contrib-copy": "~1.0.0",
+    "grunt-contrib-watch": "~1.0.0",
+    "grunt-mocha-test": "~0.12.7",
+    "grunt-newer": "~1.2.0",
+    "grunt-release": "~0.13.1",
+    "istanbul": "^0.4.3",
+    "loopback-boot": "^2.16.0",
+    "loopback-component-fixtures": "^0.0.6",
+    "mocha": "~2.4.5",
+    "mocha-sinon": "latest",
+    "rimraf": "~2.5.2",
+    "shasum": "1.0.0",
+    "sinon": "~1.17.4",
+    "sinon-chai": "~2.8.0"
+  }
+}
