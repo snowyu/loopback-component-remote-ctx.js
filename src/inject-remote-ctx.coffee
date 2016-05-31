@@ -19,16 +19,21 @@ module.exports = (app, options) ->
   modelWhiteList = []
 
   for item in BLACK_LIST
-    if item.indexOf '.'
+    if item.indexOf('.') isnt -1
       methodBlackList.push item
     else
       modelBlackList.push item
   for item in WHITE_LIST
-    if item.indexOf '.'
+    if item.indexOf('.') isnt -1
       methodWhiteList.push item
     else
       modelWhiteList.push item
 
+  debug 'argName:%s', ARG_NAME
+  debug 'methodBlackList: %s', methodBlackList
+  debug 'methodWhiteList: %s', methodWhiteList
+  debug 'modelBlackList: %s', modelBlackList
+  debug 'modelWhiteList: %s', modelWhiteList
 
   inject = (ctx, next) ->
     remoteCtx = hasHttpCtxOption(ctx.method.accepts) and ctx
@@ -56,11 +61,12 @@ module.exports = (app, options) ->
   app.remotes().methods().forEach (method) ->
     vModelName = method.sharedClass.name
     vMethodName = method.stringName
-    return unless vModelName in modelWhiteList
-    return unless vMethodName in methodWhiteList
-    return if vModelName in modelBlackList
-    return if vMethodName in methodBlackList
+    return unless !modelWhiteList.length or vModelName in modelWhiteList
+    return unless !methodWhiteList.length or vMethodName in methodWhiteList
+    return if modelBlackList.length and vModelName in modelBlackList
+    return if methodBlackList.length and vMethodName in methodBlackList
     if !hasHttpCtxOption(method.accepts)
+      debug 'method %s injected.', vMethodName
       method.accepts.push
         arg: ARG_NAME
         description: '**Do not implement in clients**.'
