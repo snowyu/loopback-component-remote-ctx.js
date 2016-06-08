@@ -9,5 +9,9 @@ module.exports = (app, options) ->
   if loopbackMajor < 2
     throw new Error('loopback-component-remeote-ctx requires loopback 2.0 or newer')
 
-  injectRemoteCtx(app, options)
+  if !options or options.enabled isnt false
+    injectRemoteCtx(app, options)
+  else
+    debug 'not enabled.'
+    Promise.reject(new TypeError 'component not enabled')
   return
