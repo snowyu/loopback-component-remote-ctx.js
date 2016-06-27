@@ -48,7 +48,10 @@ Model.beforeRemote('*', function(ctx, next){
 })
 
 Model.yourRemoteMethod = function(msg, ctx){
-  return Model.findById('id', null, {remoteCtx: ctx})
+  //if your write this before injected via the component:
+  return Model.findById('id', null, ctx)
+  //else should be this, your controller::
+  // return Model.findById('id', null, {remoteCtx: ctx})
 }
 
 Model.remoteMethod(

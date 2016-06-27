@@ -10,6 +10,7 @@ isFunction  = require 'util-ex/lib/is/type/function'
 
 module.exports = (app, options) ->
   ARG_NAME    = options.argName || 'remoteCtx'
+  REMOTE_ARG  = ARG_NAME
   BLACK_LIST  = options.blackList || []
   WHITE_LIST  = options.whiteList || []
 
@@ -40,7 +41,7 @@ module.exports = (app, options) ->
     if remoteCtx
       vOptions = remoteCtx.options || {}
       vOptions[ARG_NAME] = remoteCtx
-      ctx.args[ARG_NAME] = vOptions
+      ctx.args[REMOTE_ARG] = vOptions
     next()
     return
 
@@ -48,7 +49,7 @@ module.exports = (app, options) ->
     i = 0
     while i < accepts.length
       argDesc = accepts[i]
-      if argDesc.arg == ARG_NAME and argDesc.injectCtx
+      if argDesc.arg == REMOTE_ARG and argDesc.injectCtx
         return true
       i++
     return
@@ -70,11 +71,11 @@ module.exports = (app, options) ->
     if !hasHttpCtxOption(method.accepts)
       debug 'method %s injected.', vMethodName
       method.accepts.push
-        arg: ARG_NAME
+        arg: REMOTE_ARG
         description: '**Do not implement in clients**.'
         type: Object
         injectCtx: true
-        source: 'context'
+        # http: source: 'context'
     return
   return
 
