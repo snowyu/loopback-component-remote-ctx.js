@@ -37,9 +37,43 @@ Note: this hack would add a new argument to the remote method.
 ```js
 
 Model.observe('access', function(ctx, next){
-  console.log(ctx.options) //the remoteCtx
+  console.log(ctx.options.remoteCtx) //the remoteCtx
 })
 
+Model.beforeRemote('*', function(ctx, next){
+  Model.findById('id', null, {remoteCtx: ctx}, function(err, result){
+    if (err) return next(err);
+    next(result);
+  })
+})
+
+Model.yourRemoteMethod = function(msg, ctx){
+  return Model.findById('id', null, {remoteCtx: ctx})
+}
+
+Model.remoteMethod(
+  'yourRemoteMethod',
+  {
+    accepts: [
+      {arg: 'msg', type: String},
+      {arg: 'ctx', type: Object, http:{source: 'context'} }
+    ],
+    returns: {arg: 'greeting', type: 'string'}
+  }
+);
+
 ```
+**NOTE**: the options argument of the model's method is an undocument and it should be added before callback.
 
 
+
+
+
+
+### History
+
+
+* v0.2.0
+
+* **broken**:  put the remote context to the options.remoteCtx instead of options.
+* [bug] the original options of the model method is lost.

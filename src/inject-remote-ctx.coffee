@@ -38,7 +38,9 @@ module.exports = (app, options) ->
   inject = (ctx, next) ->
     remoteCtx = hasHttpCtxOption(ctx.method.accepts) and ctx
     if remoteCtx
-      ctx.args[ARG_NAME] = remoteCtx
+      vOptions = remoteCtx.options || {}
+      vOptions[ARG_NAME] = remoteCtx
+      ctx.args[ARG_NAME] = vOptions
     next()
     return
 
