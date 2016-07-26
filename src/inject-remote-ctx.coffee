@@ -54,29 +54,30 @@ module.exports = (app, options) ->
       i++
     return
 
-  app.remotes().before '**', (ctx, instance, next) ->
-    if isFunction(instance)
-      next = instance
-    inject ctx, next
-    return
-  # unfortunately this requires us to add the options object
-  # to the remote method definition
-  app.remotes().methods().forEach (method) ->
-    vModelName = method.sharedClass.name
-    vMethodName = method.stringName
-    return unless !modelWhiteList.length or vModelName in modelWhiteList
-    return unless !methodWhiteList.length or vMethodName in methodWhiteList
-    return if modelBlackList.length and vModelName in modelBlackList
-    return if methodBlackList.length and vMethodName in methodBlackList
-    if !hasHttpCtxOption(method.accepts)
-      debug 'method %s injected.', vMethodName
-      method.accepts.push
-        arg: REMOTE_ARG
-        description: '**Do not implement in clients**.'
-        type: Object
-        injectCtx: true
-        # http: source: 'context'
-    return
+  unless process.env.GENERATING_SDK
+    app.remotes().before '**', (ctx, instance, next) ->
+      if isFunction(instance)
+        next = instance
+      inject ctx, next
+      return
+    # unfortunately this requires us to add the options object
+    # to the remote method definition
+    app.remotes().methods().forEach (method) ->
+      vModelName = method.sharedClass.name
+      vMethodName = method.stringName
+      return unless !modelWhiteList.length or vModelName in modelWhiteList
+      return unless !methodWhiteList.length or vMethodName in methodWhiteList
+      return if modelBlackList.length and vModelName in modelBlackList
+      return if methodBlackList.length and vMethodName in methodBlackList
+      if !hasHttpCtxOption(method.accepts)
+        debug 'method %s injected.', vMethodName
+        method.accepts.push
+          arg: REMOTE_ARG
+          description: '**Do not implement in clients**.'
+          type: Object
+          injectCtx: true
+          # http: source: 'context'
+      return
   return
 
 ###
