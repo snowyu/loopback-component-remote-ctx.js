@@ -32,6 +32,8 @@ Note: this hack would add a new argument to the remote method.
   - `argName` *[String]*: the new argument name added to remote method. *defaults: remoteCtx*
 
 
+Note: the `options` argument of remote method is always be inject. DO NOT USE `options` as the argument name.
+
 ### Usage
 
 ```js
@@ -80,3 +82,8 @@ Model.remoteMethod(
 
 * **broken**:  put the remote context to the options.remoteCtx instead of options.
 * [bug] the original options of the model method is lost.
+
+
+### Refs
+
+* https://github.com/strongloop/loopback/issues/1495

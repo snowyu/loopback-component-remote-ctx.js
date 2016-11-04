@@ -7,10 +7,12 @@ Usage on operator hooks:
 
 debug       = require('debug')('loopback:component:remoteCtx')
 isFunction  = require 'util-ex/lib/is/type/function'
+extend      = require 'util-ex/lib/_extend'
 
 module.exports = (app, options) ->
   ARG_NAME    = options.argName || 'remoteCtx'
-  REMOTE_ARG  = ARG_NAME
+  # REMOTE_ARG  = ARG_NAME # the loopback internal used the options always, so.....
+  REMOTE_ARG  = 'options' # DONT CHANGE!!
   BLACK_LIST  = options.blackList || []
   WHITE_LIST  = options.whiteList || []
 
@@ -37,11 +39,14 @@ module.exports = (app, options) ->
   debug 'modelWhiteList: %s', modelWhiteList
 
   inject = (ctx, next) ->
-    remoteCtx = hasHttpCtxOption(ctx.method.accepts) and ctx
-    if remoteCtx
-      vOptions = remoteCtx.options || {}
-      vOptions[ARG_NAME] = remoteCtx
-      ctx.args[REMOTE_ARG] = vOptions
+    options = hasHttpCtxOption(ctx.method.accepts) and (ctx.args.options || {})
+    if options
+      options[ARG_NAME] = ctx
+      ctx.args.options = options
+    # remoteCtx = hasHttpCtxOption(ctx.method.accepts) and ctx
+    # if remoteCtx
+    #   # push the arg from remote method into the internal options to pass to operator hook.
+    #   # ctx.args.options[REMOTE_ARG] = ctx
     next()
     return
 
@@ -76,7 +81,9 @@ module.exports = (app, options) ->
           description: '**Do not implement in clients**.'
           type: Object
           injectCtx: true
-          # http: source: 'context'
+          # avoid to get cyclical loop in the SharedMethod.convertArg method.
+          # the issue is the traverse(raw).forEach(...) which seems to get caught up on some async flow with the concurrent http reqs.
+          http: source: 'context'
       return
   return
 
