@@ -1,7 +1,7 @@
 {
   "name": "loopback-component-remote-ctx",
   "description": "add the remote context to the specified remote methods of the loopback application.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": {
     "name": "Riceball LEE",
     "email": "snowyu.lee@gmail.com",
