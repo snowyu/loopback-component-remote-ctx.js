@@ -12,6 +12,5 @@ module.exports = (app, options) ->
   if !options or options.enabled isnt false
     injectRemoteCtx(app, options)
   else
-    debug 'not enabled.'
-    Promise.reject(new TypeError 'component not enabled')
+    debug 'component not enabled.'
   return
