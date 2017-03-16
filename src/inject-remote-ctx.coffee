@@ -8,8 +8,13 @@ Usage on operator hooks:
 debug       = require('debug')('loopback:component:remoteCtx')
 isFunction  = require 'util-ex/lib/is/type/function'
 extend      = require 'util-ex/lib/_extend'
+semver      = require 'semver'
 
 module.exports = (app, options) ->
+  loopback    = app.loopback
+  unless semver.gte loopback.version, '2.37.0'
+    throw new Error('loopback-component-remeote-ctx requires loopback 2.37.0 or newer')
+
   ARG_NAME    = options.argName || 'remoteCtx'
   # REMOTE_ARG  = ARG_NAME # the loopback internal used the options always, so.....
   REMOTE_ARG  = 'options' # DONT CHANGE!!
@@ -32,39 +37,35 @@ module.exports = (app, options) ->
     else
       modelWhiteList.push item
 
+  for Model in app.models()
+    vModelName = Model.modelName
+    continue unless !modelWhiteList.length or vModelName in modelWhiteList
+    continue if modelBlackList.length and vModelName in modelBlackList
+    Model.createOptionsFromRemotingContext = (ctx)->
+      result = {}
+      result[ARG_NAME] = ctx
+      result
+
+
   debug 'argName:%s', ARG_NAME
   debug 'methodBlackList: %s', methodBlackList
   debug 'methodWhiteList: %s', methodWhiteList
   debug 'modelBlackList: %s', modelBlackList
   debug 'modelWhiteList: %s', modelWhiteList
 
-  inject = (ctx, next) ->
-    options = hasHttpCtxOption(ctx.method.accepts) and (ctx.args.options || {})
-    if options
-      options[ARG_NAME] = ctx
-      ctx.args.options = options
-    # remoteCtx = hasHttpCtxOption(ctx.method.accepts) and ctx
-    # if remoteCtx
-    #   # push the arg from remote method into the internal options to pass to operator hook.
-    #   # ctx.args.options[REMOTE_ARG] = ctx
-    next()
-    return
-
   hasHttpCtxOption = (accepts) ->
     i = 0
     while i < accepts.length
       argDesc = accepts[i]
-      if argDesc.arg == REMOTE_ARG and argDesc.injectCtx
+      if argDesc.arg == 'options' and argDesc.http and
+      (argDesc.http == 'optionsFromRequest' or
+      (isFunction(argDesc.http) && argDesc.http.name == 'createOptionsViaModelMethod')
+      )
         return true
       i++
     return
 
   unless process.env.GENERATING_SDK
-    app.remotes().before '**', (ctx, instance, next) ->
-      if isFunction(instance)
-        next = instance
-      inject ctx, next
-      return
     # unfortunately this requires us to add the options object
     # to the remote method definition
     app.remotes().methods().forEach (method) ->
@@ -80,22 +81,18 @@ module.exports = (app, options) ->
           arg: REMOTE_ARG
           description: '**Do not implement in clients**.'
           type: Object
-          injectCtx: true
-          # avoid to get cyclical loop in the SharedMethod.convertArg method.
-          # the issue is the traverse(raw).forEach(...) which seems to get caught up on some async flow with the concurrent http reqs.
-          http: source: 'context'
+          # http: 'optionsFromRequest'
+          # too late herer so tricky from lib/model.js
+          http: `function createOptionsViaModelMethod(ctx){
+                var EMPTY_OPTIONS = {};
+                var ModelCtor = ctx.method && ctx.method.ctor;
+                if (!ModelCtor)
+                  return EMPTY_OPTIONS;
+                if (typeof ModelCtor.createOptionsFromRemotingContext !== 'function')
+                  return EMPTY_OPTIONS;
+                debug('createOptionsFromRemotingContext for %s', ctx.method.stringName);
+                return ModelCtor.createOptionsFromRemotingContext(ctx);
+                }`
       return
   return
-
-###
-Contractor.afterRemote('**', function (ctx, next) {
-  var Contract = Contractor.app.models.Contract
-  var filter = {};
-  var options = ctx;
-  // the example above was also missing the `err` argument
-  Contract.find(filter, options, function (err, contracts) {
-    console.log(contracts);
-  });
-});
-###
 

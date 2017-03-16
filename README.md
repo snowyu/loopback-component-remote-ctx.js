@@ -8,6 +8,7 @@ Note: this hack would add a new argument to the remote method.
 
 ### Installation
 
+0. Require: loopback 2.37.0 or newer
 1. Install in you loopback project:
 
   `npm install --save loopback-component-remote-ctx`
@@ -36,6 +37,22 @@ Note: the `options` argument of remote method is always be inject. DO NOT USE `o
 
 ### Usage
 
+You should enable the model-level setting `injectOptionsFromRemoteContext` if you use the loopback v2.x
+
+```js
+// common/models/customer.json
+{
+  "name": "Customer",
+  "base": "User",
+  "injectOptionsFromRemoteContext": true,
+  "properties": {
+    // ...
+  }
+}
+```
+
+And you can NEVER USE the `options` name. Check your remote method arguments before used it.
+
 ```js
 
 Model.observe('access', function(ctx, next){
@@ -43,7 +60,7 @@ Model.observe('access', function(ctx, next){
 })
 
 Model.beforeRemote('*', function(ctx, next){
-  Model.findById('id', null, {remoteCtx: ctx}, function(err, result){
+  Model.findById('id', null, ctx, function(err, result){
     if (err) return next(err);
     next(result);
   })
@@ -53,7 +70,7 @@ Model.yourRemoteMethod = function(msg, ctx){
   //if your write this before injected via the component:
   return Model.findById('id', null, ctx)
   //else should be this, your controller::
-  // return Model.findById('id', null, {remoteCtx: ctx})
+  // return Model.findById('id', null, ctx)
 }
 
 Model.remoteMethod(
@@ -61,14 +78,13 @@ Model.remoteMethod(
   {
     accepts: [
       {arg: 'msg', type: String},
-      {arg: 'ctx', type: Object, http:{source: 'context'} }
+      {arg: 'options', type: Object, http:'optionsFromRequest' }
     ],
     returns: {arg: 'greeting', type: 'string'}
   }
 );
 
 ```
-**NOTE**: the options argument of the model's method is an undocument and it should be added before callback.
 
 
 
@@ -77,11 +93,11 @@ Model.remoteMethod(
 
 ### History
 
-
+* v0.3.0 (loopback >=2.37.0)
+  * use the `optionsFromRequest` object.
 * v0.2.0
-
-* **broken**:  put the remote context to the options.remoteCtx instead of options.
-* [bug] the original options of the model method is lost.
+  * **broken**:  put the remote context to the options.remoteCtx instead of options.
+  * [bug] the original options of the model method is lost.
 
 
 ### Refs
