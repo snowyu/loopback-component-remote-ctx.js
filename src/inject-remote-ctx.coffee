@@ -42,7 +42,7 @@ module.exports = (app, options) ->
     continue unless !modelWhiteList.length or vModelName in modelWhiteList
     continue if modelBlackList.length and vModelName in modelBlackList
     Model.createOptionsFromRemotingContext = (ctx)->
-      result = {}
+      result = {accessToken: ctx.req.accessToken}
       result[ARG_NAME] = ctx
       result
 
