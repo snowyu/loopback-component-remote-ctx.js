@@ -80,7 +80,7 @@ module.exports = (app, options) ->
         method.accepts.push
           arg: REMOTE_ARG
           description: '**Do not implement in clients**.'
-          type: Object
+          type: 'Object'
           # http: 'optionsFromRequest'
           # too late herer so tricky from lib/model.js
           http: `function createOptionsViaModelMethod(ctx){
